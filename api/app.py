@@ -4,8 +4,8 @@ import random
 import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///results.db'
-db = SQLAlchemy(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://default:kaDLqePyI4b9@ep-crimson-poetry-a4wbybo0.us-east-1.aws.neon.tech:5432/verceldb' # não pode ficar diretamente no código, falha de segurança gravissima
+db.init_app(app)
 
 class Result(db.Model):
     id = db.Column(db.Integer, primary_key=True)
