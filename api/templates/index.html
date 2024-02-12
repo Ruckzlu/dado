@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RICARDO DICE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>RICARDO DICE</h1>
+    <div id="input-container">
+        <label for="sides">Number of sides:</label>
+        <input type="number" id="sides" name="sides" value="20" min="1">
+        <label for="quantity">Number of dice:</label>
+        <input type="number" id="quantity" name="quantity" value="1" min="1">
+        <button onclick="rollDice()">Roll Dice</button>
+    </div>
+    <div id="result-container">
+        <div class="dice-container">
+            <div id="result" class="dice"></div>
+            <div id="reason" class="result-reason"></div>
+        </div>
+    </div>
+    <div class="results">
+        <ul id="results-list">
+            {% for result in results %}
+                <li><span class="result-label">Result:</span> {{ result.rolls | join(', ') }} ({{ result.sides }}-sided dice)</li>
+            {% endfor %}
+        </ul>
+        <button class="delete-button" onclick="deleteLastResult()">Delete Last Result</button>
+    </div>
+
+    <script>
+        function rollDice() {
+            var sides = document.getElementById("sides").value;
+            var quantity = document.getElementById("quantity").value;
+            var resultContainer = document.getElementById("result");
+            var diceContainer = document.querySelector(".dice-container");
+
+            fetch(`/roll_dice/${sides}/${quantity}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultContainer.innerHTML = `<div class="dice">${data.rolls.join(', ')}</div>`;
+                    document.getElementById("reason").innerText = `${data.rolls.length} (${data.sides}-sided dice)`;
+                    addResultToList(data.rolls.join(', '), data.sides);
+                    diceContainer.classList.add("rolling");
+                    setTimeout(() => {
+                        diceContainer.classList.remove("rolling");
+                    }, 500); // Ajuste o tempo da animação aqui (500ms neste exemplo)
+                });
+        }
+
+        function addResultToList(rolls, sides) {
+            var resultsList = document.getElementById("results-list");
+            var resultItem = document.createElement("li");
+            resultItem.innerHTML = `<span class="result-label">Result:</span> ${rolls} (${sides}-sided dice)`;
+            resultsList.appendChild(resultItem);
+        }
+
+        function deleteLastResult() {
+            var resultsList = document.getElementById("results-list");
+            if (resultsList.lastChild) {
+                resultsList.removeChild(resultsList.lastChild);
+            }
+            fetch('/delete_last_result');  // Chama a rota para excluir o último resultado no servidor
+        }
+    </script>
+</body>
+</html>
